@@ -67,14 +67,15 @@
 [CAPTAIN]
 "Playtime Requirements" = 2400
 "Required Account Age" = 14
+"Required Player Age" = 40
 "Spawn Positions" = 1
 "Total Positions" = 1
 
 [CARGO_TECHNICIAN]
-"# Playtime Requirements" = 0
-"# Required Account Age" = 0
-"# Spawn Positions" = 3
-"# Total Positions" = 5
+"Playtime Requirements" = 0
+"Required Account Age" = 0
+"Spawn Positions" = 2
+"Total Positions" = 4
 
 [CHAPLAIN]
 "Playtime Requirements" = 0
@@ -91,12 +92,14 @@
 [CHIEF_ENGINEER]
 "Playtime Requirements" = 2400
 "Required Account Age" = 7
+"Required Player Age" = 35
 "Spawn Positions" = 1
 "Total Positions" = 1
 
 [CHIEF_MEDICAL_OFFICER]
 "Playtime Requirements" = 2400
 "Required Account Age" = 7
+"Required Player Age" = 35
 "Spawn Positions" = 1
 "Total Positions" = 1
 
@@ -117,12 +120,6 @@
 "Required Account Age" = 7
 "Spawn Positions" = 1
 "Total Positions" = 1
-
-[CORONER]
-"# Playtime Requirements" = 0
-"# Required Account Age" = 0
-"# Spawn Positions" = 1
-"# Total Positions" = 1
 
 [CURATOR]
 "Playtime Requirements" = 0
@@ -163,12 +160,14 @@
 [HEAD_OF_PERSONNEL]
 "Playtime Requirements" = 2400
 "Required Account Age" = 10
+"Required Player Age" = 30
 "Spawn Positions" = 1
 "Total Positions" = 1
 
 [HEAD_OF_SECURITY]
 "Playtime Requirements" = 2400
 "Required Account Age" = 14
+"Required Player Age" = 30
 "Spawn Positions" = 1
 "Total Positions" = 1
 
@@ -229,12 +228,14 @@
 [QUARTERMASTER]
 "Playtime Requirements" = 2400
 "Required Account Age" = 7
+"Required Player Age" = 25
 "Spawn Positions" = 1
 "Total Positions" = 1
 
 [RESEARCH_DIRECTOR]
 "Playtime Requirements" = 2400
 "Required Account Age" = 7
+"Required Player Age" = 40
 "Spawn Positions" = 1
 "Total Positions" = 1
 
