@@ -10,7 +10,10 @@
 SUBSYSTEM_DEF(player_ranks)
 	name = "Player Ranks"
 	flags = SS_NO_FIRE
-	init_order = INIT_ORDER_PLAYER_RANKS
+	init_stage = INITSTAGE_EARLY
+	dependencies = list(
+		/datum/controller/subsystem/server_maint,
+	)
 	// The following controllers handle most of the legacy system's functions,
 	// and provide a layer of abstraction for this subsystem to have cleaner
 	// logic.
@@ -202,7 +205,6 @@ SUBSYSTEM_DEF(player_ranks)
 		return
 
 	load_player_rank_sql(veteran_controller)
-
 
 /**
  * Handles populating the player rank from the database.

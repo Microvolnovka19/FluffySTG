@@ -1,4 +1,3 @@
-import { useBackend } from '../backend';
 import {
   Box,
   Button,
@@ -7,7 +6,9 @@ import {
   Input,
   Section,
   Stack,
-} from '../components';
+} from 'tgui-core/components';
+
+import { useBackend } from '../backend';
 import { NtosWindow } from '../layouts';
 
 // byond defines for the program state
@@ -145,7 +146,7 @@ export const NtosNetChat = (props) => {
           </Stack.Item>
           <Stack.Divider />
           <Stack.Item grow={4}>
-            <Stack vertical fill>
+            <Stack fill vertical g={0}>
               <Stack.Item grow>
                 <Section scrollable fill>
                   {(in_channel &&
@@ -257,8 +258,8 @@ export const NtosNetChat = (props) => {
                     </Section>
                   </Stack.Item>
                   <Section>
-                    <Stack.Item mb="8px">Settings for {title}:</Stack.Item>
-                    <Stack.Item>
+                    <Stack vertical g={0.5}>
+                      <Stack.Item>Settings for {title}:</Stack.Item>
                       {!!(in_channel && authorized) && (
                         <>
                           <Button.Input
@@ -307,7 +308,7 @@ export const NtosNetChat = (props) => {
                           />
                         </>
                       )}
-                    </Stack.Item>
+                    </Stack>
                   </Section>
                 </Stack>
               </Stack.Item>

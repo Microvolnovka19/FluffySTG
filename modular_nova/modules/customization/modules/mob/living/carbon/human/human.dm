@@ -16,7 +16,7 @@
 						continue
 					if(G.is_hidden(src))
 						continue
-					var/obj/item/organ/external/genital/ORG = get_organ_slot(G.associated_organ_slot)
+					var/obj/item/organ/genital/ORG = get_organ_slot(G.associated_organ_slot)
 					if(!ORG)
 						continue
 					line += ORG.get_description_string(G)
@@ -71,6 +71,12 @@
 
 /mob/living/carbon/human/species/skrell
 	race = /datum/species/skrell
+
+/mob/living/carbon/human/species/abductorweak
+	race = /datum/species/abductor/abductorweak
+
+/mob/living/carbon/human/species/monkey/kobold
+	race = /datum/species/monkey/kobold
 
 /mob/living/carbon/human/verb/toggle_undies()
 	set category = "IC"

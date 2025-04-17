@@ -8,8 +8,8 @@
 	icon_state = "hair_pigtailss"
 
 /datum/sprite_accessory/hair/nova/bedhead_long
-	name = "Floorlength Bedhead (Alt)"
-	icon_state = "hair_floorlength_bedhead_alt"
+	name = "Longer Bedhead"
+	icon_state = "hair_longer_bedhead"
 
 /datum/sprite_accessory/hair/nova/dave
 	name = "Dave"
@@ -671,6 +671,14 @@
 	name = "Long Dreadlocks"
 	icon_state = "hair_dreadlocks_long"
 
+/datum/sprite_accessory/hair/nova/halfbob
+	name = "Half Bob"
+	icon_state = "hair_bob_half"
+
+/datum/sprite_accessory/hair/nova/halfbob_mirrored
+	name = "Mirrored Half Bob"
+	icon_state = "hair_bob_half_mirrored"
+
 // Facial hair
 
 /datum/sprite_accessory/facial_hair/nova
@@ -711,3 +719,19 @@
 /datum/sprite_accessory/facial_hair/nova/selleckreceeded
 	name = "Moustache (Selleck - Alt)"
 	icon_state = "facial_selleckreceeded"
+
+/datum/sprite_accessory/facial_hair/nova/faciallizardlick
+	name = "Lizard Tongue Flick"
+	icon_state = "facial_lizardlick_s"
+
+/datum/sprite_accessory/facial_hair/nova/faciallizardlickslow
+	name = "Lizard Tongue Flick Slow"
+	icon_state = "facial_lizardlickslow_s"
+
+/datum/sprite_accessory/facial_hair/nova/faciallizardlickfast
+	name = "Lizard Tongue Flick Fast"
+	icon_state = "facial_lizardlickfast_s"
+
+/datum/sprite_accessory/facial_hair/nova/noselick
+	name = "Nose Lick"
+	icon_state = "noselick"

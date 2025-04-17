@@ -28,6 +28,15 @@
 			lobbyscreen.RegisterSignal(src, COMSIG_HUD_LOBBY_COLLAPSED, TYPE_PROC_REF(/atom/movable/screen/lobby, collapse_button))
 			lobbyscreen.RegisterSignal(src, COMSIG_HUD_LOBBY_EXPANDED, TYPE_PROC_REF(/atom/movable/screen/lobby, expand_button))
 
+	if (!owner.client.is_localhost())
+		return
+
+	var/atom/movable/screen/lobby/button/start_now/start_button = new(our_hud = src)
+	start_button.SlowInit()
+	static_inventory += start_button
+	start_button.RegisterSignal(src, COMSIG_HUD_LOBBY_COLLAPSED, TYPE_PROC_REF(/atom/movable/screen/lobby, collapse_button))
+	start_button.RegisterSignal(src, COMSIG_HUD_LOBBY_EXPANDED, TYPE_PROC_REF(/atom/movable/screen/lobby, expand_button))
+
 /// Load and then display the buttons for relevant station traits
 /datum/hud/new_player/proc/show_station_trait_buttons()
 	if (!mymob?.client || mymob.client.interviewee || !length(GLOB.lobby_station_traits))
@@ -118,8 +127,9 @@
 	screen_loc = "TOP,CENTER:-61"
 
 /atom/movable/screen/lobby/button
+	mouse_over_pointer = MOUSE_HAND_POINTER
 	///Is the button currently enabled?
-	var/enabled = TRUE
+	VAR_PROTECTED/enabled = TRUE
 	///Is the button currently being hovered over with the mouse?
 	var/highlighted = FALSE
 	///Should this button play the select sound?
@@ -183,6 +193,7 @@
 		return FALSE
 	enabled = status
 	update_appearance(UPDATE_ICON)
+	mouse_over_pointer = enabled ? MOUSE_HAND_POINTER : MOUSE_INACTIVE_POINTER
 	return TRUE
 
 ///Prefs menu
@@ -244,6 +255,7 @@
 
 	ready = !ready
 	if(ready)
+		new_player.auto_deadmin_on_ready_or_latejoin()
 		new_player.ready = PLAYER_READY_TO_PLAY
 		base_icon_state = "ready"
 	else
@@ -259,12 +271,13 @@
 	icon = 'icons/hud/lobby/join.dmi'
 	icon_state = "" //Default to not visible
 	base_icon_state = "join_game"
-	enabled = FALSE
+	enabled = null // set in init
 
 /atom/movable/screen/lobby/button/join/Initialize(mapload, datum/hud/hud_owner)
 	. = ..()
 	switch(SSticker.current_state)
 		if(GAME_STATE_PREGAME, GAME_STATE_STARTUP)
+			set_button_status(FALSE)
 			RegisterSignal(SSticker, COMSIG_TICKER_ENTER_SETTING_UP, PROC_REF(show_join_button))
 		if(GAME_STATE_SETTING_UP)
 			set_button_status(TRUE)
@@ -305,6 +318,8 @@
 			to_chat(new_player, span_notice("You have been added to the queue to join the game. Your position in queue is [SSticker.queued_players.len]."))
 		return
 
+	new_player.auto_deadmin_on_ready_or_latejoin()
+
 	if(!LAZYACCESS(params2list(params), CTRL_CLICK))
 		GLOB.latejoin_menu.ui_interact(new_player)
 	else
@@ -330,13 +345,14 @@
 	icon = 'icons/hud/lobby/observe.dmi'
 	icon_state = "observe_disabled"
 	base_icon_state = "observe"
-	enabled = FALSE
+	enabled = null // set in init
 
 /atom/movable/screen/lobby/button/observe/Initialize(mapload, datum/hud/hud_owner)
 	. = ..()
 	if(SSticker.current_state > GAME_STATE_STARTUP)
 		set_button_status(TRUE)
 	else
+		set_button_status(FALSE)
 		RegisterSignal(SSticker, COMSIG_TICKER_ENTER_PREGAME, PROC_REF(enable_observing))
 
 /atom/movable/screen/lobby/button/observe/Click(location, control, params)
@@ -603,6 +619,146 @@
 
 	//pull the shutter back off-screen
 	animate(transform = matrix(), time = SHUTTER_MOVEMENT_DURATION, easing = CUBIC_EASING|EASE_IN)
+
+/// LOCALHOST ONLY - Start Now button
+/atom/movable/screen/lobby/button/start_now
+	name = "Start Now (LOCALHOST ONLY)"
+	screen_loc = "TOP:-146,CENTER:-54"
+	icon = 'icons/hud/lobby/start_now.dmi'
+	icon_state = "start_now"
+	base_icon_state = "start_now"
+	always_available = FALSE
+	select_sound_play = FALSE
+
+/atom/movable/screen/lobby/button/start_now/Click(location, control, params)
+	. = ..()
+	if(!. || !usr.client.is_localhost() || !check_rights_for(usr.client, R_SERVER))
+		return
+	SEND_SOUND(hud.mymob, sound('sound/effects/splat.ogg', volume = 50))
+	SSticker.start_immediately = TRUE
+	if(SSticker.current_state == GAME_STATE_STARTUP)
+		to_chat(usr, span_admin("The server is still setting up, but the round will be started as soon as possible."))
+
+#define OVERLAY_X_DIFF 12
+#define OVERLAY_Y_DIFF 5
+
+///Lobby screen that appears before the game has started showing how many players there are and who is ready.
+/atom/movable/screen/lobby/new_player_info
+	name = "New Player Info"
+	screen_loc = "TOP:-20,CENTER:192"
+	icon = 'icons/hud/lobby/newplayer.dmi'
+	icon_state = null //we only show up when we get update appearance called, cause we need our overlay to not look bad.
+	base_icon_state = "newplayer"
+	maptext_height = 70
+	maptext_width = 80
+	maptext_x = OVERLAY_X_DIFF
+	maptext_y = OVERLAY_Y_DIFF
+
+	var/show_static = TRUE
+
+/atom/movable/screen/lobby/new_player_info/Initialize(mapload, datum/hud/hud_owner)
+	. = ..()
+	switch(SSticker.current_state)
+		if(GAME_STATE_PREGAME, GAME_STATE_STARTUP)
+			RegisterSignal(SSticker, COMSIG_TICKER_ENTER_SETTING_UP, PROC_REF(hide_info))
+		if(GAME_STATE_SETTING_UP)
+			RegisterSignal(SSticker, COMSIG_TICKER_ERROR_SETTING_UP, PROC_REF(show_info))
+
+	START_PROCESSING(SSnewplayer_info, src)
+	update_text()
+	update_appearance(UPDATE_ICON)
+
+/atom/movable/screen/lobby/new_player_info/Destroy()
+	STOP_PROCESSING(SSnewplayer_info, src)
+	return ..()
+
+/atom/movable/screen/lobby/new_player_info/update_overlays()
+	. = ..()
+	if(!always_available)
+		return .
+	. += mutable_appearance(icon, "[base_icon_state]_overlay", layer = src.layer+0.03)
+	if(show_static)
+		. += mutable_appearance(icon, "static_base", alpha = 20, layer = src.layer+0.01)
+		//we have this in a separate file because `generate_icon_alpha_mask` puts lighting even on non-existent pixels,
+		//giving the icon a weird background color.
+		var/mutable_appearance/scanline = mutable_appearance(generate_icon_alpha_mask('icons/hud/lobby/newplayer_scanline.dmi', "scanline"), alpha = 20, layer = src.layer+0.02)
+		scanline.pixel_y = OVERLAY_X_DIFF
+		scanline.pixel_x = OVERLAY_Y_DIFF
+		. += scanline
+
+/atom/movable/screen/lobby/new_player_info/update_icon_state()
+	. = ..()
+	if(!always_available)
+		icon_state = "[base_icon_state]_disabled"
+	else
+		icon_state = base_icon_state
+
+/atom/movable/screen/lobby/new_player_info/process(seconds_per_tick)
+	update_text()
+
+/atom/movable/screen/lobby/new_player_info/collapse_button()
+	show_static = FALSE
+	update_text()
+	//to be in sync with parent, we'll turn the TV off in this time instead.
+	animate(src, appearance = update_appearance(UPDATE_ICON), time = SHUTTER_MOVEMENT_DURATION + SHUTTER_WAIT_DURATION)
+	//we go to the right, not up
+	animate(transform = transform.Translate(x = 146, y = 0), time = SHUTTER_MOVEMENT_DURATION, easing = CUBIC_EASING|EASE_IN)
+
+/atom/movable/screen/lobby/new_player_info/expand_button()
+	. = ..()
+	show_static = TRUE
+	update_appearance(UPDATE_ICON)
+	update_text()
+
+/atom/movable/screen/lobby/new_player_info/proc/hide_info()
+	SIGNAL_HANDLER
+
+	STOP_PROCESSING(SSnewplayer_info, src)
+	UnregisterSignal(SSticker, COMSIG_TICKER_ENTER_SETTING_UP)
+	RegisterSignal(SSticker, COMSIG_TICKER_ERROR_SETTING_UP, PROC_REF(show_info))
+	always_available = FALSE
+	update_appearance(UPDATE_ICON)
+	update_text()
+
+/atom/movable/screen/lobby/new_player_info/proc/show_info()
+	SIGNAL_HANDLER
+
+	always_available = TRUE
+	update_appearance(UPDATE_ICON)
+	update_text()
+	START_PROCESSING(SSnewplayer_info, src)
+	UnregisterSignal(SSticker, COMSIG_TICKER_ERROR_SETTING_UP)
+	RegisterSignal(SSticker, COMSIG_TICKER_ENTER_SETTING_UP, PROC_REF(hide_info))
+
+/atom/movable/screen/lobby/new_player_info/proc/update_text()
+	if(!always_available || !hud || !show_static)
+		maptext = null
+		return
+	var/new_maptext
+	if(!MC_RUNNING())
+		new_maptext = "<span style='text-align: center; vertical-align: middle'>Loading...</span>"
+	else
+		var/time_remaining = SSticker.GetTimeLeft()
+		if(time_remaining > 0)
+			time_remaining = "[round(time_remaining/10)]s"
+		else if(time_remaining == -10)
+			time_remaining = "DELAYED"
+		else
+			time_remaining = "SOON"
+
+		if(hud.mymob.client.holder)
+			new_maptext = "<span style='text-align: center; vertical-align: middle'>Starting in [time_remaining]<br /> \
+				[LAZYLEN(GLOB.clients)] player\s<br /> \
+				[SSticker.totalPlayersReady] players ready<br /> \
+				[SSticker.total_admins_ready] / [length(GLOB.admins)] admins ready</span>"
+		else
+			new_maptext = "<span style='text-align: center; vertical-align: middle; font-size: 18px'>[time_remaining]</span><br /> \
+				<span style='text-align: center; vertical-align: middle'>[LAZYLEN(GLOB.clients)] player\s</span>"
+
+	maptext = MAPTEXT(new_maptext)
+
+#undef OVERLAY_X_DIFF
+#undef OVERLAY_Y_DIFF
 
 #undef SHUTTER_MOVEMENT_DURATION
 #undef SHUTTER_WAIT_DURATION

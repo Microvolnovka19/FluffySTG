@@ -5,7 +5,6 @@
 #define SCANGATE_WANTED "Wanted"
 #define SCANGATE_SPECIES "Species"
 #define SCANGATE_NUTRITION "Nutrition"
-#define SCANGATE_CONTRABAND "Contraband"
 #define SCANGATE_GENDER "Gender" // NOVA EDIT ADDITION
 
 /obj/machinery/scanner_gate
@@ -40,10 +39,8 @@
 	var/minus_false_beep = 0
 	///Base false positive/negative chance
 	var/base_false_beep = 5
-	///Is an n-spect scanner attached to the gate? Enables contraband scanning.
-	var/obj/item/inspector/n_spect = null
 	///List of species that can be scanned by the gate. Supports adding more species' IDs during in-game.
-	var/list/available_species = list(
+	var/static/list/available_species = list(
 		SPECIES_HUMAN,
 		SPECIES_LIZARD,
 		SPECIES_FLYPERSON,
@@ -54,6 +51,32 @@
 		SPECIES_PODPERSON,
 		SPECIES_GOLEM,
 		SPECIES_ZOMBIE,
+	)
+	/// All scan modes available to the scanner
+	var/static/list/all_modes = list(
+		SCANGATE_NONE,
+		SCANGATE_MINDSHIELD,
+		SCANGATE_DISEASE,
+		SCANGATE_GUNS,
+		SCANGATE_WANTED,
+		SCANGATE_SPECIES,
+		SCANGATE_NUTRITION,
+		SCANGATE_GENDER, // NOVA EDIT ADDITION
+	)
+	/// All disease severity thresholds available to the scanner
+	var/static/list/all_disease_thresholds = list(
+		DISEASE_SEVERITY_POSITIVE,
+		DISEASE_SEVERITY_NONTHREAT,
+		DISEASE_SEVERITY_MINOR,
+		DISEASE_SEVERITY_MEDIUM,
+		DISEASE_SEVERITY_HARMFUL,
+		DISEASE_SEVERITY_DANGEROUS,
+		DISEASE_SEVERITY_BIOHAZARD,
+	)
+	/// All nutrition levels available to the scanner
+	var/static/list/nutrition_modes = list(
+		"Starving",
+		"Obese",
 	)
 	/// Overlay object we're using for scanlines
 	var/obj/effect/overlay/scanline = null
@@ -79,12 +102,6 @@
 	for(var/datum/stock_part/scanning_module/scanning_module in component_parts)
 		minus_false_beep = scanning_module.tier //The better are scanninning modules - the lower is chance of False Positives
 
-/obj/machinery/scanner_gate/atom_deconstruct(disassembled)
-	. = ..()
-	if(n_spect)
-		n_spect.forceMove(drop_location())
-		n_spect = null
-
 /obj/machinery/scanner_gate/examine(mob/user)
 	. = ..()
 
@@ -93,18 +110,6 @@
 		. += span_notice("The control panel is ID-locked. Swipe a valid ID to unlock it.")
 	else
 		. += span_notice("The control panel is unlocked. Swipe an ID to lock it.")
-	if(n_spect)
-		. += span_notice("The scanner is equipped with an N-Spect scanner. Use a [span_boldnotice("crowbar")] to uninstall.")
-
-/obj/machinery/scanner_gate/add_context(atom/source, list/context, obj/item/held_item, mob/user)
-	. = ..()
-	if(n_spect && held_item?.tool_behaviour == TOOL_CROWBAR)
-		context[SCREENTIP_CONTEXT_LMB] = "Remove N-Spect scanner"
-		return CONTEXTUAL_SCREENTIP_SET
-	if(!n_spect && istype(held_item, /obj/item/inspector))
-		context[SCREENTIP_CONTEXT_LMB] = "Install N-Spect scanner"
-		return CONTEXTUAL_SCREENTIP_SET
-
 
 /obj/machinery/scanner_gate/proc/on_entered(datum/source, atom/movable/thing)
 	SIGNAL_HANDLER
@@ -139,19 +144,6 @@
 		return
 	set_scanline("passive")
 
-/obj/machinery/scanner_gate/item_interaction(mob/living/user, obj/item/tool, list/modifiers)
-	if(istype(tool, /obj/item/inspector))
-		if(n_spect)
-			to_chat(user, span_warning("The scanner is already equipped with an N-Spect scanner."))
-			return ITEM_INTERACT_BLOCKING
-		else
-			to_chat(user, span_notice("You install an N-Spect scanner on [src]."))
-			n_spect = tool
-			if(!user.transferItemToLoc(tool, src))
-				return ITEM_INTERACT_BLOCKING
-			return ITEM_INTERACT_SUCCESS
-	return NONE
-
 /obj/machinery/scanner_gate/attackby(obj/item/attacking_item, mob/user, params)
 	var/obj/item/card/id/card = attacking_item.GetID()
 	if(card)
@@ -173,24 +165,6 @@
 		if(panel_open && is_wire_tool(attacking_item))
 			wires.interact(user)
 	return ..()
-
-/obj/machinery/scanner_gate/crowbar_act(mob/living/user, obj/item/tool)
-	. = ..()
-	if(n_spect)
-		if(locked)
-			balloon_alert(user, "locked!")
-			return ITEM_INTERACT_BLOCKING
-
-		to_chat(user, span_notice("You uninstall [n_spect] from [src]."))
-		n_spect.forceMove(drop_location())
-		return ITEM_INTERACT_SUCCESS
-
-/obj/machinery/scanner_gate/Exited(atom/gone)
-	. = ..()
-	if(gone == n_spect)
-		n_spect = null
-		if(scangate_mode == SCANGATE_CONTRABAND)
-			scangate_mode = SCANGATE_NONE
 
 /obj/machinery/scanner_gate/emag_act(mob/user, obj/item/card/emag/emag_card)
 	if(obj_flags & EMAGGED)
@@ -280,14 +254,6 @@
 					if(scanned_human.gender == detect_gender)
 						beep = TRUE
 		//NOVA EDIT ADDITION END - MORE SCANNER GATE OPTIONS
-		if(SCANGATE_CONTRABAND)
-			for(var/obj/item/content in thing.get_all_contents_skipping_traits(TRAIT_CONTRABAND_BLOCKER))
-				detected_thing = "Contraband"
-				if(content.is_contraband())
-					beep = TRUE
-					break
-			if(!n_spect.scans_correctly)
-				beep = !beep //We do a little trolling
 
 	if(reverse)
 		beep = !beep
@@ -354,8 +320,6 @@
 	data["target_species_id"] = detect_species_id
 	data["target_nutrition"] = detect_nutrition
 	data["target_gender"] = detect_gender //NOVA EDIT - MORE SCANNER GATE OPTIONS
-	data["contraband_enabled"] = !!n_spect
-	data["target_zombie"] = (detect_species_id == SPECIES_ZOMBIE)
 	return data
 
 /obj/machinery/scanner_gate/ui_act(action, list/params, datum/tgui/ui, datum/ui_state/state)
@@ -366,6 +330,8 @@
 	switch(action)
 		if("set_mode")
 			var/new_mode = params["new_mode"]
+			if(!new_mode || !(new_mode in all_modes))
+				return
 			scangate_mode = new_mode
 			. = TRUE
 		if("toggle_reverse")
@@ -377,26 +343,25 @@
 			. = TRUE
 		if("set_disease_threshold")
 			var/new_threshold = params["new_threshold"]
+			if(!new_threshold || !(new_threshold in all_disease_thresholds))
+				return
 			disease_threshold = new_threshold
 			. = TRUE
 		if("set_target_species")
 			var/new_specie_id = params["new_species_id"]
-			if(!(new_specie_id in available_species))
+			if(!new_specie_id || !(new_specie_id in available_species))
 				return
 			detect_species_id = new_specie_id
 			. = TRUE
 		if("set_target_nutrition")
 			var/new_nutrition = params["new_nutrition"]
-			var/nutrition_list = list(
-				"Starving",
-				"Obese"
-			)
-			if(new_nutrition && (new_nutrition in nutrition_list))
-				switch(new_nutrition)
-					if("Starving")
-						detect_nutrition = NUTRITION_LEVEL_STARVING
-					if("Obese")
-						detect_nutrition = NUTRITION_LEVEL_FAT
+			if(!new_nutrition || !(new_nutrition in nutrition_modes))
+				return
+			switch(new_nutrition)
+				if("Starving")
+					detect_nutrition = NUTRITION_LEVEL_STARVING
+				if("Obese")
+					detect_nutrition = NUTRITION_LEVEL_FAT
 			. = TRUE
 		//NOVA EDIT BEGIN - MORE SCANNER GATE OPTIONS
 		if("set_target_gender")
@@ -416,7 +381,7 @@
 
 /obj/machinery/scanner_gate/preset_guns
 	locked = TRUE
-	req_access = ACCESS_SECURITY
+	req_access = list(ACCESS_SECURITY)
 	scangate_mode = SCANGATE_GUNS
 
 #undef SCANGATE_NONE
@@ -426,5 +391,4 @@
 #undef SCANGATE_WANTED
 #undef SCANGATE_SPECIES
 #undef SCANGATE_NUTRITION
-#undef SCANGATE_CONTRABAND
 #undef SCANGATE_GENDER // NOVA EDIT ADDITION

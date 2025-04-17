@@ -1,15 +1,15 @@
 /** Window sizes in pixels */
-export enum WINDOW_SIZES {
-  small = 30,
-  medium = 50,
-  large = 70,
-  width = 231,
+export enum WindowSize {
+  Small = 30,
+  Medium = 50,
+  Large = 70,
+  Width = 231,
 }
 
 /** Line lengths for autoexpand */
-export enum LINE_LENGTHS {
-  small = 22,
-  medium = 45,
+export enum LineLength {
+  Small = 20,
+  Medium = 40,
 }
 
 /**
@@ -39,3 +39,27 @@ export const RADIO_PREFIXES = {
   ':l ': 'SolFed',
   // NOVA EDIT ADDITION END
 } as const;
+
+// TFF EDIT ADDITION START
+export const RUS_PREFIXES = {
+  ':ф ': ':a ',
+  ':и ': ':b ',
+  ':с ': ':c ',
+  ':у ': ':e ',
+  ':п ': ':g ',
+  ':ь ': ':m ',
+  ':т ': ':n ',
+  ':щ ': ':o ',
+  ':з ': ':p ',
+  ':ы ': ':s ',
+  ':е ': ':t ',
+  ':г ': ':u ',
+  ':м ': ':v ',
+  ':н ': ':y ',
+  ':ц ': ':w ',
+  ':л ': ':k ',
+  ':й ': ':q ',
+  ':ш ': ':i ',
+  ':д ': ':l ',
+} as const;
+// TFF EDIT ADDITION END

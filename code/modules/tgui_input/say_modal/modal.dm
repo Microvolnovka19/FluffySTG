@@ -64,11 +64,12 @@
 /datum/tgui_say/proc/load()
 	window_open = FALSE
 
-	winset(client, "tgui_say", "pos=848,500;size=231,30;is-visible=0;")
+	winset(client, "tgui_say", "pos=848,500;is-visible=0;")
 
 	window.send_message("props", list(
-		lightMode = client.prefs?.read_preference(/datum/preference/toggle/tgui_say_light_mode),
-		maxLength = max_length,
+		"lightMode" = client.prefs?.read_preference(/datum/preference/toggle/tgui_say_light_mode),
+		"scale" = client.prefs?.read_preference(/datum/preference/toggle/ui_scale),
+		"maxLength" = max_length,
 	))
 
 	stop_thinking()
@@ -86,7 +87,7 @@
 	if(!payload?["channel"])
 		CRASH("No channel provided to an open TGUI-Say")
 	window_open = TRUE
-	if(payload["channel"] != OOC_CHANNEL && payload["channel"] != ADMIN_CHANNEL && payload["channel"] != LOOC_CHANNEL) // NOVA EDIT CHANGE (Add LOOC_CHANNEL)
+	if(payload["channel"] != OOC_CHANNEL && payload["channel"] != ADMIN_CHANNEL && payload["channel"] != LOOC_CHANNEL && payload["channel"] != EVENT_CHANNEL) // NOVA EDIT CHANGE (Add LOOC_CHANNEL) // TFF EDIT - Eventmaker
 		start_thinking()
 	if(!client.typing_indicators)
 		log_speech_indicators("[key_name(client)] started typing at [loc_name(client.mob)], indicators DISABLED.")

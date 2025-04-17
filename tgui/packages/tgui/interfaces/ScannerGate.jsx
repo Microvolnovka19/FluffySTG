@@ -1,5 +1,6 @@
+import { Box, Button, LabeledList, Section } from 'tgui-core/components';
+
 import { useBackend } from '../backend';
-import { Box, Button, LabeledList, Section } from '../components';
 import { Window } from '../layouts';
 import { InterfaceLockNoticeBox } from './common/InterfaceLockNoticeBox';
 
@@ -12,6 +13,18 @@ const DISEASE_THEASHOLD_LIST = [
   'Dangerous',
   'BIOHAZARD',
 ];
+// NOVA EDIT ADDITION START
+const TARGET_GENDER_LIST = [
+  {
+    name: 'Male',
+    value: 'male',
+  },
+  {
+    name: 'Female',
+    value: 'female',
+  },
+];
+// NOVA EDIT ADDITION END
 
 const TARGET_NUTRITION_LIST = [
   {
@@ -73,10 +86,6 @@ const SCANNER_GATE_ROUTES = {
     component: () => ScannerGateGender,
   },
   //  NOVA EDIT END - MORE SCANNER GATE OPTIONS
-  Contraband: {
-    title: 'Scanner Mode: Contraband',
-    component: () => ScannerGateContraband,
-  },
 };
 
 const ScannerGateControl = (props) => {
@@ -104,7 +113,6 @@ const ScannerGateControl = (props) => {
 
 const ScannerGateOff = (props) => {
   const { act, data } = useBackend();
-  const { contraband_enabled } = data;
   return (
     <>
       <Box mb={2}>Select a scanning mode below.</Box>
@@ -136,11 +144,6 @@ const ScannerGateOff = (props) => {
         <Button
           content="Nutrition"
           onClick={() => act('set_mode', { new_mode: 'Nutrition' })}
-        />
-        <Button
-          content="Contraband"
-          disabled={contraband_enabled ? false : true}
-          onClick={() => act('set_mode', { new_mode: 'Contraband' })}
         />
       </Box>
     </>
@@ -314,21 +317,6 @@ const ScannerGateGender = (props) => {
   );
 };
 //  NOVA EDIT END - MORE SCANNER GATE OPTIONS
-const ScannerGateContraband = (props) => {
-  const { data } = useBackend();
-  const { reverse } = data;
-  return (
-    <>
-      <Box mb={2}>
-        Trigger if the person scanned {reverse ? 'does not have' : 'has'} any
-        anything considered contraband. Requires an N-spect scanner installed to
-        enable.
-      </Box>
-      <ScannerGateMode />
-    </>
-  );
-};
-
 const ScannerGateMode = (props) => {
   const { act, data } = useBackend();
   const { reverse } = data;

@@ -1,6 +1,7 @@
 
 /atom/movable/screen/blob
 	icon = 'icons/hud/blob.dmi'
+	mouse_over_pointer = MOUSE_HAND_POINTER
 
 /atom/movable/screen/blob/MouseEntered(location,control,params)
 	. = ..()
@@ -150,17 +151,16 @@
 		var/mob/eye/blob/B = usr
 		B.relocate_core()
 
+/atom/movable/screen/blob_power_display
+	name = "blob power"
+	icon_state = "block"
+	screen_loc = ui_health
+	mouse_opacity = MOUSE_OPACITY_TRANSPARENT
+	plane = ABOVE_HUD_PLANE
+
 /datum/hud/blob_overmind/New(mob/owner)
 	..()
 	var/atom/movable/screen/using
-
-	blobpwrdisplay = new /atom/movable/screen(null, src)
-	blobpwrdisplay.name = "blob power"
-	blobpwrdisplay.icon_state = "block"
-	blobpwrdisplay.screen_loc = ui_health
-	blobpwrdisplay.mouse_opacity = MOUSE_OPACITY_TRANSPARENT
-	SET_PLANE_EXPLICIT(blobpwrdisplay, ABOVE_HUD_PLANE, owner)
-	infodisplay += blobpwrdisplay
 
 	healths = new /atom/movable/screen/healths/blob(null, src)
 	infodisplay += healths
@@ -182,11 +182,11 @@
 	static_inventory += using
 
 	using = new /atom/movable/screen/blob/node_blob(null, src)
-	using.screen_loc = ui_hand_position(2)
+	using.screen_loc = ui_hand_position(RIGHT_HANDS)
 	static_inventory += using
 
 	using = new /atom/movable/screen/blob/factory_blob(null, src)
-	using.screen_loc = ui_hand_position(1)
+	using.screen_loc = ui_hand_position(LEFT_HANDS)
 	static_inventory += using
 
 	using = new /atom/movable/screen/blob/readapt_strain(null, src)

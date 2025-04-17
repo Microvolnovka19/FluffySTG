@@ -3,7 +3,7 @@ GENERAL_PROTECT_DATUM(/datum/controller/subsystem/admin_verbs)
 SUBSYSTEM_DEF(admin_verbs)
 	name = "Admin Verbs"
 	flags = SS_NO_FIRE
-	init_order = INIT_ORDER_ADMIN_VERBS
+	init_stage = INITSTAGE_EARLY
 	/// A list of all admin verbs indexed by their type.
 	var/list/datum/admin_verb/admin_verbs_by_type = list()
 	/// A list of all admin verbs indexed by their visibility flag.
@@ -109,7 +109,6 @@ SUBSYSTEM_DEF(admin_verbs)
 	if(!admin.holder.check_for_rights(verb_singleton.permissions))
 		to_chat(admin, span_adminnotice("You lack the permissions to do this."))
 		return
-
 	var/old_usr = usr
 	usr = admin.mob
 	// THE MACRO ENSURES THIS EXISTS. IF IT EVER DOESNT EXIST SOMEONE DIDNT USE THE DAMN MACRO!

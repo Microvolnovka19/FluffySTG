@@ -11,7 +11,7 @@
 	school = SCHOOL_FORBIDDEN
 	cooldown_time = 20 SECONDS
 
-	invocation = "Op' 'oY 'Mi'd"
+	invocation = "Op'n y'r m'd."
 	invocation_type = INVOCATION_WHISPER
 	spell_requirements = NONE
 	cast_range = 6
@@ -32,7 +32,7 @@
 		return FALSE
 
 	cast_on.adjust_confusion(10 SECONDS)
-	cast_on.adjustOxyLoss(30)
+	cast_on.adjustOxyLoss(40) // FLUFFY FRONTIER EDIT: ANTAG BUFF #5159; original: 30
 	cast_on.cause_hallucination(get_random_valid_hallucination_subtype(/datum/hallucination/body), "Mind gate, cast by [owner]")
 	cast_on.cause_hallucination(/datum/hallucination/delusion/preset/heretic/gate, "Caused by mindgate")
 	cast_on.adjustOrganLoss(ORGAN_SLOT_BRAIN, 30)

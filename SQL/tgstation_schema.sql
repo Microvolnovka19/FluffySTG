@@ -53,9 +53,9 @@ DROP TABLE IF EXISTS `admin_ranks`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `admin_ranks` (
   `rank` varchar(32) NOT NULL,
-  `flags` smallint(5) unsigned NOT NULL,
-  `exclude_flags` smallint(5) unsigned NOT NULL,
-  `can_edit_flags` smallint(5) unsigned NOT NULL,
+  `flags` mediumint(5) unsigned NOT NULL,
+  `exclude_flags` mediumint(5) unsigned NOT NULL,
+  `can_edit_flags` mediumint(5) unsigned NOT NULL,
   PRIMARY KEY (`rank`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -307,7 +307,7 @@ DROP TABLE IF EXISTS `messages`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `messages` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `type` enum('memo','message','message sent','note','watchlist entry') NOT NULL,
+  `type` enum('memo','message','message sent','note','watchlist entry', 'eventmaker note') NOT NULL,
   `targetckey` varchar(32) NOT NULL,
   `adminckey` varchar(32) NOT NULL,
   `text` varchar(2048) NOT NULL,
@@ -597,6 +597,16 @@ CREATE TABLE `achievement_metadata` (
 	`achievement_name` VARCHAR(64) NULL DEFAULT NULL,
 	`achievement_description` VARCHAR(512) NULL DEFAULT NULL,
 	PRIMARY KEY (`achievement_key`)
+) ENGINE=InnoDB;
+
+-- Table structure for table 'x_progress'
+
+DROP TABLE IF EXISTS `fish_progress`;
+CREATE TABLE `fish_progress` (
+  `ckey` VARCHAR(32) NOT NULL,
+  `progress_entry` VARCHAR(32) NOT NULL,
+  `datetime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ckey`,`progress_entry`)
 ) ENGINE=InnoDB;
 
 --

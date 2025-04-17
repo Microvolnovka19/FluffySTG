@@ -31,12 +31,12 @@
 
 /datum/generecipe/cindikinesis
 	input_one = /datum/mutation/human/geladikinesis
-	input_two = /datum/mutation/human/firebreath
+	input_two = /datum/mutation/human/fire // fiery sweat NOT fiery breath
 	result = /datum/mutation/human/cindikinesis
 
 /datum/generecipe/pyrokinesis
 	input_one = /datum/mutation/human/cryokinesis
-	input_two = /datum/mutation/human/firebreath
+	input_two = /datum/mutation/human/fire // fiery sweat NOT fiery breath
 	result = /datum/mutation/human/pyrokinesis
 
 /datum/generecipe/thermal_adaptation
@@ -68,3 +68,8 @@
 	input_one = /datum/mutation/human/hulk
 	input_two = /datum/mutation/human/clumsy
 	result = /datum/mutation/human/hulk/ork
+
+/datum/generecipe/rock_absorber
+	input_one = /datum/mutation/human/rock_eater
+	input_two = /datum/mutation/human/stoner
+	result = /datum/mutation/human/rock_absorber
